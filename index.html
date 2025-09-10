@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>automotive — Summary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Fonts: Proxima Nova if installed, else Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.3/datatables.min.css"/>
+
+  <style>
+    :root {
+      --bg: #0f1220;
+      --card: #141a2a;
+      --card-2: #181e31;
+      --text: #f3f6ff;
+      --text-dim: #b8c1d9;
+      --border: #252c42;
+      --brand: #7aa2ff;
+      --brand-soft: #1a2340;
+      --card-radius: 14px;
+    }
+    * { font-family: "Proxima Nova", Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial, sans-serif; }
+    html, body { background: var(--bg); color: var(--text); }
+
+    .page-header{
+      background: radial-gradient(1200px 400px at 10% -10%, rgba(122,162,255,.25), transparent),
+                  linear-gradient(90deg, var(--brand-soft), rgba(10,14,25,0.6));
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h2{ font-weight:700; letter-spacing:.2px; color:var(--text); }
+    .btn, .btn:focus, .btn:active { box-shadow:none; }
+    .btn-outline-secondary{ color:var(--text); border-color:var(--border); }
+    .btn-outline-secondary:hover{ background:var(--card-2); border-color:var(--border); }
+    .muted{ color:var(--text-dim); }
+
+    .section-card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      padding: 1rem 1.25rem; height: 100%;
+      color: var(--text);
+    }
+
+    /* DataTables dark theme */
+    table.dataTable{ table-layout: fixed; color: var(--text); }
+    table.table{
+      --bs-table-color: var(--text);
+      --bs-table-bg: transparent;
+      --bs-table-striped-color: var(--text);
+      --bs-table-hover-color: var(--text);
+      --bs-table-border-color: var(--border);
+      --bs-table-striped-bg: rgba(255,255,255,0.06);
+      --bs-table-hover-bg: rgba(255,255,255,0.08);
+    }
+    table.dataTable thead th{
+      background: var(--card-2) !important;
+      border-bottom: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+    table.dataTable td, table.dataTable th{ word-wrap: break-word; vertical-align: middle; }
+    table.dataTable tbody td{ border-color: var(--border); color: var(--text); }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label{ color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select{
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .dataTables_wrapper .dataTables_filter input::placeholder{ color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button{
+      color: var(--text) !important; border-color: var(--border) !important;
+      background: transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current{
+      background: var(--brand-soft) !important; border-color: var(--border) !important; color: var(--text) !important;
+    }
+
+    a, a:visited{ color: var(--brand); }
+    a:hover{ color: #aecdff; }
+
+    .footer-note{ color: var(--text-dim); font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <header class="page-header py-3">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap">
+      <div>
+        <h2 class="mb-0">automotive — Summary</h2>
+        <div class="muted">Category: <strong>automotive</strong></div>
+      </div>
+      <a class="btn btn-outline-secondary btn-sm" href="#" onclick="window.print()">Print</a>
+    </div>
+  </header>
+
+  <main class="container my-4">
+    <div class="section-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0" style="color:var(--text);">Product Subtype Summary</h5>
+        <div class="muted">Generated on 09 Sep 2025, 08:09 PM</div>
+      </div>
+      <table id="tbl-summary" class="table table-striped table-hover w-100"></table>
+    </div>
+    <div class="mt-3 footer-note">
+      Data source: <code>noonbiml.mukul.search_assortment_final_v2</code>. This summary lists one HTML report per product_subtype under <strong>automotive</strong>.
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/v/bs5/dt-2.0.3/datatables.min.js"></script>
+  <script>
+  const ROWS = [
+    {"product_subtype": "dash_camera", "overall_score": 0.91, "overall_st_hits": 7198, "overall_gmv_oppt": 6280.54, "report_href": "automotive__dash-camera.html"},
+    {"product_subtype": "engine_oil", "overall_score": 0.84, "overall_st_hits": 1399, "overall_gmv_oppt": 939.2, "report_href": "automotive__engine-oil.html"},
+    {"product_subtype": "vacuum_cleaners", "overall_score": 0.89, "overall_st_hits": 6873, "overall_gmv_oppt": 53199.96, "report_href": "automotive__vacuum-cleaners.html"},
+    {"product_subtype": "wax", "overall_score": 0.8, "overall_st_hits": 591, "overall_gmv_oppt": 109.68, "report_href": "automotive__wax.html"}
+  ];
+
+  const fmtInt = (v) => (v===null||v===undefined||isNaN(v)) ? "—" : Number(v).toLocaleString();
+  const fmtNum = (v) => (v===null||v===undefined||isNaN(v)) ? "—" : Number(v).toLocaleString(undefined, {maximumFractionDigits:2});
+  const toLink = (href, label) => href ? `<a href="${href}" target="_blank" rel="noopener">${label||href}</a>` : '';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    $('#tbl-summary').DataTable({
+      data: ROWS,
+      columns: [
+        { title: 'Product Subtype', data: 'product_subtype' },
+        { title: 'Overall Score', data: 'overall_score', className: 'text-end', render:(d)=>fmtNum(d) },
+        { title: 'Overall Search Hits', data: 'overall_st_hits', className: 'text-end', render:(d)=>fmtInt(d) },
+        { title: 'Overall GMV Opportunity', data: 'overall_gmv_oppt', className: 'text-end', render:(d)=>fmtNum(d) },
+        { title: 'Report', data: 'report_href', render:(d)=>toLink(d, 'Open report') }
+      ],
+      order: [[0, 'asc']],
+      pageLength: 25,
+      lengthMenu: [25, 50, 100],
+      autoWidth: false,
+      deferRender: true
+    });
+  });
+</script>
+</body>
+</html>
