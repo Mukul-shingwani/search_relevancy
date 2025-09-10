@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Search Assortment — automotive / dash_camera</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Fonts: Proxima Nova if installed, else Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- DataTables + Buttons -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/fh-4.0.1/r-3.0.1/datatables.min.css"/>
+
+  <style>
+    :root {
+      --bg: #0f1220;
+      --card: #141a2a;
+      --card-2: #181e31;
+      --text: #f3f6ff;     /* normal text = light */
+      --text-dim: #b8c1d9;
+      --border: #252c42;
+      --brand: #7aa2ff;
+      --brand-soft: #1a2340;
+      --card-radius: 14px;
+    }
+    * { font-family: "Proxima Nova", Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial, sans-serif; }
+    html, body { background: var(--bg); color: var(--text); }
+
+    .page-header {
+      background: radial-gradient(1200px 400px at 10% -10%, rgba(122,162,255,.25), transparent),
+                  linear-gradient(90deg, var(--brand-soft), rgba(10,14,25,0.6));
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h2 { font-weight: 700; letter-spacing:.2px; color: var(--text); }
+    .muted { color: var(--text-dim); }
+
+    .btn, .btn:focus, .btn:active { box-shadow:none; }
+    .btn-outline-secondary { color: var(--text); border-color: var(--border); }
+    .btn-outline-secondary:hover { background: var(--card-2); border-color: var(--border); }
+    .btn-outline-primary { color: var(--text); border-color: var(--brand); }
+    .btn-outline-primary:hover { background: rgba(122,162,255,.12); }
+
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      padding: 1rem 1.1rem 1.25rem 1.1rem;
+      height: 100%;
+      contain: content;
+      color: var(--text);
+    }
+    .section-title { font-weight: 700; font-size: 1.05rem; margin-bottom:.6rem; color: var(--text); }
+
+    /* Executive summary pills */
+    .summary-pill {
+      border-radius: 999px;
+      padding:.7rem 1.1rem;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      display:inline-flex; gap:.6rem; align-items:center;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+      margin:.3rem .6rem .3rem 0;
+    }
+    .summary-pill .label { color: var(--text-dim); font-size:.9rem; }
+    .summary-pill .value { font-weight:700; color: var(--text); font-size:1.05rem; }
+
+    /* DataTables: dark + light text everywhere */
+    table.dataTable { table-layout: fixed; color: var(--text); }
+    table.table {
+      --bs-table-color: var(--text);
+      --bs-table-bg: transparent;
+      --bs-table-striped-color: var(--text);
+      --bs-table-hover-color: var(--text);
+      --bs-table-border-color: var(--border);
+      --bs-table-striped-bg: rgba(255,255,255,0.06);
+      --bs-table-hover-bg: rgba(255,255,255,0.08);
+    }
+    table.dataTable thead th {
+      background: var(--card-2) !important;
+      border-bottom: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+    table.dataTable tbody td { vertical-align: top; border-color: var(--border); color: var(--text); }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label { color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .dataTables_wrapper .dataTables_filter input::placeholder { color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      color: var(--text) !important; border-color: var(--border) !important;
+      background: transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: var(--brand-soft) !important; border-color: var(--border) !important; color: var(--text) !important;
+    }
+
+    a, a:visited { color: var(--brand); }
+    a:hover { color: #aecdff; }
+
+    /* Long text handling + toggles */
+    .wrap-text { white-space: pre-wrap; line-height:1.35rem; color: var(--text); }
+    .clamp-6 {
+      display: -webkit-box;
+      -webkit-line-clamp: 6;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cell-stack { display:flex; flex-direction:column; gap:.45rem; color: var(--text); }
+    .toggle-more { font-size:.85rem; padding:0; color: var(--text-dim); }
+    .toggle-more:hover { color: var(--text); }
+
+    /* Actionables list (pills centered vertically) */
+    .act {
+      display:flex; gap:.7rem; align-items:center;       /* centered vertically */
+      background: var(--card-2); border: 1px solid var(--border);
+      border-radius: 12px; padding:.65rem .8rem; color: var(--text);
+    }
+    .act .tag {
+      flex: 0 0 auto; font-size:.72rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.04em; color: var(--brand);
+      padding:.22rem .55rem; border:1px solid var(--brand); border-radius:999px;
+      background: rgba(122,162,255,.08);
+    }
+    .act .txt { flex:1 1 auto; color: var(--text); }
+
+    .footer-note { color: var(--text-dim); font-size:.85rem; }
+  </style>
+</head>
+
+<body>
+  <header class="page-header py-3">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-between">
+        <div>
+          <h2 class="mb-0">Search Assortment — automotive / dash_camera</h2>
+          <div class="muted">Category: <strong>automotive</strong> &nbsp;|&nbsp; Subtype: <strong>dash_camera</strong></div>
+        </div>
+        <div class="text-end">
+          <a class="btn btn-outline-secondary btn-sm" href="#" onclick="window.print()">Print</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container my-4">
+
+    <!-- Executive Summary -->
+    <div class="section-card mb-4">
+      <div class="d-flex align-items-center flex-wrap">
+        <div class="summary-pill"><span class="label">Overall Score</span><span class="value" id="pill-score">—</span></div>
+        <div class="summary-pill"><span class="label">Overall Search Hits</span><span class="value" id="pill-hits">—</span></div>
+        <div class="summary-pill"><span class="label">Overall GMV Opportunity</span><span class="value" id="pill-gmv">—</span></div>
+        <div class="ms-auto muted">Generated on 09 Sep 2025, 08:09 PM</div>
+      </div>
+    </div>
+
+    <!-- Keyword level insights -->
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="section-card">
+          <div class="section-title">Keyword Insights — Generic</div>
+          <table id="tbl-generic" class="table table-striped table-hover w-100"></table>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="section-card">
+          <div class="section-title">Keyword Insights — Branded</div>
+          <table id="tbl-branded" class="table table-striped table-hover w-100"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed analysis -->
+    <div class="section-card mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="section-title mb-0">Detailed Analysis</div>
+        <div class="d-flex gap-2">
+          <button id="btn-expand-all" class="btn btn-sm btn-outline-primary">Expand all</button>
+          <button id="btn-collapse-all" class="btn btn-sm btn-outline-secondary">Collapse all</button>
+        </div>
+      </div>
+      <p class="muted mb-2">Actionables per search term. Links open in a new tab.</p>
+      <table id="tbl-detail" class="table table-striped table-hover w-100"></table>
+    </div>
+
+    <div class="my-4 footer-note">
+      Data source: <code>noonbiml.mukul.search_assortment_final_v2</code>. Report for <strong>automotive × dash_camera</strong>.
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/fh-4.0.1/r-3.0.1/datatables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    const EXEC_SUMMARY = {"overall_score": 0.91, "overall_st_hits": 7198, "overall_gmv_oppt": 6280.54};
+    const DATA_GENERIC = [{"search_term": "dash camera for car", "performance": "Good (0.94)", "st_hits": 2418, "e_gmv": 0, "st_gmv": 3573.5}, {"search_term": "dual dash cam", "performance": "Good (0.94)", "st_hits": 17, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "dash cam", "performance": "Excellent (0.95)", "st_hits": 3873, "e_gmv": 0, "st_gmv": 5192.28}, {"search_term": "dashcam", "performance": "Good (0.94)", "st_hits": 0, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "rear dash cam", "performance": "Good (0.94)", "st_hits": 4, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "4k dash cam", "performance": "Good (0.95)", "st_hits": 22, "e_gmv": 0, "st_gmv": 258.01}, {"search_term": "car camera", "performance": "Good (0.92)", "st_hits": 415, "e_gmv": 0, "st_gmv": 267.01}, {"search_term": "car dash camera", "performance": "Good (0.93)", "st_hits": 0, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "wifi dash cam", "performance": "Good (0.95)", "st_hits": 4, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "dash camera for car 4k", "performance": "Excellent (0.95)", "st_hits": 13, "e_gmv": 0, "st_gmv": 0.0}];
+    const DATA_BRANDED = [{"search_term": "garmin dash cam", "performance": "Average (0.89)", "st_hits": 10, "e_gmv": 0, "st_gmv": 1549.03}, {"search_term": "thinkware dash cam", "performance": "Below Average (0.84)", "st_hits": 1, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "70mai dash cam", "performance": "Good (0.94)", "st_hits": 403, "e_gmv": 0, "st_gmv": 1698.02}, {"search_term": "viofo dash cam", "performance": "Below Average (0.83)", "st_hits": 6, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "xiaomi dash cam", "performance": "Average (0.89)", "st_hits": 12, "e_gmv": 0, "st_gmv": 0.0}];
+    const DATA_DETAIL  = [{"search_term": "garmin dash cam", "brand_actionable": "- Garmin appears prominently on Noon with 8 listings vs Amazon’s 5, showing stronger brand presence on Noon.  \n- Amazon includes a unique Garmin X310 4K model absent on Noon.", "assortment_actionable": "- Noon ranks core Garmin dash cams top but lacks advanced 4K and dual-lens variants Amazon features.", "overall_perception": "- Noon’s first page is Garmin-focused and premium; Amazon offers broader Garmin innovation and some non-Garmin options, enhancing shopper choice.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=garmin%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=garmin+dash+cam"}, {"search_term": "thinkware dash cam", "brand_actionable": "- Thinkware dominates Noon (9/10) and Amazon (10/10), but Noon lacks variety in newer models like Amazon’s R2-4K and T700 series.  \n- Noon misses emerging Thinkware variants (e.g., Q800PRO, Q200) present on Amazon, limiting brand depth by ~30%.", "assortment_actionable": "- Noon’s top slots favor core models (U3000, Q1000, F70 PRO) but lack bundled offers and advanced features seen in Amazon’s top 5.", "overall_perception": "- Noon’s first page shows strong Thinkware focus but less premium and fewer feature-rich options than Amazon’s diverse, high-end Thinkware lineup.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=thinkware%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=thinkware+dash+cam"}, {"search_term": "70mai dash cam", "brand_actionable": "- Noon features 70mai prominently with 4 SKUs vs Amazon’s 6, showing weaker brand depth.  \n- Noon misses Xiaomi 70mai A500S Pro Plus variant present on Amazon.", "assortment_actionable": "- Noon ranks fewer 70mai premium models top; Amazon leads with broader 4K, dual-channel, and advanced feature variants upfront.", "overall_perception": "- Noon’s first page mixes mid-tier and premium 70mai models; Amazon prioritizes high-end, feature-rich 70mai dash cams, boosting shopper confidence.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=70mai%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=70mai+dash+cam"}, {"search_term": "viofo dash cam", "brand_actionable": "- Viofo brand dominates Noon (100% listings) and Amazon (~90%), but Noon misses 3-channel models Amazon offers.  \n- Noon lacks A229 Pro 3-channel variants present and well-ranked on Amazon.", "assortment_actionable": "- Noon ranks fewer premium multi-channel and 3-channel Viofo dash cams in top slots compared to Amazon’s broader feature-rich range.", "overall_perception": "- Noon’s first page shows solid Viofo focus but fewer premium, multi-channel models; Amazon offers richer, more diverse Viofo options boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=viofo%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=viofo+dash+cam"}, {"search_term": "xiaomi dash cam", "brand_actionable": "- Xiaomi appears prominently on Amazon (5 listings) vs minimal presence on Noon (1 related accessory).  \n- Noon covers 2/5 key Amazon Xiaomi dash cam models (40%).", "assortment_actionable": "- Noon lacks top Xiaomi dash cam models in top ranks, Amazon ranks multiple Xiaomi variants prominently.", "overall_perception": "- Noon’s first page mixes unrelated Xiaomi accessories and generic cams; Amazon leads with focused, branded Xiaomi dash cams.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=xiaomi%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=xiaomi+dash+cam"}, {"search_term": "dash camera for car", "brand_actionable": "- Noon covers 3/10 top Amazon brands (30%), missing key brands like 70Mai and ROVE prominently featured on Amazon.  \n- Amazon shows stronger brand variety with multiple premium models; Noon lacks these leading brand presences.", "assortment_actionable": "- Noon lacks top-tier, feature-rich dash cams in top ranks; Amazon ranks advanced multi-channel and GPS-enabled models prominently.", "overall_perception": "- Noon’s first page mixes mid-range and budget models; Amazon leads with premium, branded, feature-rich dash cams boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=dash%20camera%20for%20car&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=dash+camera+for+car"}, {"search_term": "dual dash cam", "brand_actionable": "- Noon covers 3/10 top Amazon brands (30%), missing ROVE and DDPAI which rank high on Amazon.  \n- Noon lacks presence of key premium brands like ROVE R2-4K and DDPAI N1 dual dash cams.", "assortment_actionable": "- Noon’s top ranks favor generic or mid-tier models; Amazon features premium, feature-rich dual dash cams prominently.", "overall_perception": "- Noon’s first page mixes budget and mid-range models; Amazon leads with premium, branded, and feature-focused dual dash cams.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=dual%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=dual+dash+cam"}, {"search_term": "dash cam", "brand_actionable": "- Noon covers 3/7 top Amazon dash cam brands (43%), missing ROVE and WOLFBOX.  \n- Noon lacks 5G WiFi and STARVIS sensor brands prominence seen on Amazon.", "assortment_actionable": "- Noon’s top ranks lack key premium 4K dual-channel models with fast WiFi and app features Amazon highlights.", "overall_perception": "- Noon’s first page mixes mid-tier and budget cams; Amazon leads with premium, feature-rich, branded dash cams upfront.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=dash+cam"}, {"search_term": "dashcam", "brand_actionable": "- Noon covers 3/10 top Amazon dashcam brands (30%), missing ROVE and WOLFBOX presence.  \n- Noon lacks prominent STARVIS sensor branding seen in 4 Amazon top listings.", "assortment_actionable": "- Noon’s top slots lack multi-channel and advanced 4K dashcams with bundled memory cards, unlike Amazon’s feature-rich top ranks.", "overall_perception": "- Noon’s first page mixes mid-budget generics; Amazon leads with premium, branded, feature-rich dashcams building higher shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=dashcam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=dashcam"}, {"search_term": "rear dash cam", "brand_actionable": "- Noon lacks 70mai and ROVE brands present on Amazon’s top listings.  \n- Noon covers 3/7 key Amazon brands (43%), missing popular budget and premium options.", "assortment_actionable": "- Noon’s top ranks favor generic dual-channel dash cams; Amazon features more branded, feature-rich rear dash cams.", "overall_perception": "- Noon’s first page mixes mid-to-high price generics; Amazon leads with trusted branded, rear dash cam specialists boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=rear%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=rear+dash+cam"}, {"search_term": "4k dash cam", "brand_actionable": "- Noon covers 3/6 top Amazon brands (e.g., 70mai, Rove missing or less prominent).  \n- Key brands REDTIGER, WOLFANG present on Amazon, absent on Noon.", "assortment_actionable": "- Noon lacks top brand flagship 4K dash cams in top ranks, favoring mid-tier models.", "overall_perception": "- Noon’s first page mixes premium and mid-range; Amazon leads with stronger brand presence and clearer 4K focus.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=4k%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=4k+dash+cam"}, {"search_term": "car camera", "brand_actionable": "- Noon covers 4/10 Amazon brands (40%), missing ROVE and WOLFBOX presence.  \n- Key brands like ROVE appear 4x on Amazon vs 0 on Noon’s first page.", "assortment_actionable": "- Noon lacks multi-channel (front/rear/inside) dash cams prominence seen top-ranked on Amazon.", "overall_perception": "- Noon’s first page mixes mid-range and budget models; Amazon leads with premium, feature-rich branded dash cams.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=car%20camera&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=car+camera"}, {"search_term": "car dash camera", "brand_actionable": "- Noon covers 3/8 top Amazon brands (38%), missing key brands like ROVE and 70Mai.  \n- Amazon features stronger brand diversity with multiple STARVIS sensor models; Noon lacks these prominent branded options.", "assortment_actionable": "- Noon’s top ranks favor generic models; Amazon leads with feature-rich, multi-channel, and branded dash cams in prime slots.", "overall_perception": "- Noon’s first page skews budget/generic; Amazon presents premium, branded, and technologically advanced dash cams, boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=car%20dash%20camera&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=car+dash+camera"}, {"search_term": "wifi dash cam", "brand_actionable": "- Noon covers 4/10 Amazon brands (40%), missing key brands like Rove and 70Mai prevalent on Amazon.  \n- Noon lacks strong presence of top WiFi dash cam brands dominating Amazon’s top ranks.", "assortment_actionable": "- Noon’s top slots lack diverse WiFi dash cams with advanced features like 5G WiFi and app control, seen on Amazon.", "overall_perception": "- Noon’s first page mixes mid-tier and generic WiFi dash cams; Amazon leads with premium, feature-rich, branded models boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=wifi%20dash%20cam&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=wifi+dash+cam"}, {"search_term": "dash camera for car 4k", "brand_actionable": "- Noon covers 3/5 key Amazon brands (ROVE, 70mai absent on Noon).  \n- Noon lacks prominent ROVE and 70mai presence, key 4K dash cam brands on Amazon.", "assortment_actionable": "- Noon’s top slots lack top-tier branded 4K dash cams like ROVE R2-4K, favoring mid-tier models.", "overall_perception": "- Noon’s first page mixes mid-range and generic models; Amazon leads with premium, feature-rich, branded 4K dash cams.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=dash%20camera%20for%20car%204k&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=dash+camera+for+car+4k"}];
+
+    const fmtInt = (v) => (v === null || v === undefined || isNaN(v)) ? "—" : Number(v).toLocaleString();
+    const fmtNum = (v) => (v === null || v === undefined || isNaN(v)) ? "—" : Number(v).toLocaleString(undefined, {"minimumFractionDigits":0,"maximumFractionDigits":2});
+    const toLink = (url, label) => {
+      if (!url || typeof url !== 'string') return '';
+      const safe = url.startsWith('http') ? url : null;
+      return safe ? `<a href="${safe}" target="_blank" rel="noopener">${label || 'Open'}</a>` : '';
+    };
+    const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+
+    // Single "Actionables" cell from 3 fields
+    const makeActionablesCell = (row) => {
+      const items = [];
+      if (row.brand_actionable) items.push(`<div class="act"><div class="tag">Brand</div><div class="txt wrap-text">${escapeHTML(row.brand_actionable)}</div></div>`);
+      if (row.assortment_actionable) items.push(`<div class="act"><div class="tag">Assortment</div><div class="txt wrap-text">${escapeHTML(row.assortment_actionable)}</div></div>`);
+      if (row.overall_perception) items.push(`<div class="act"><div class="tag">Perception</div><div class="txt wrap-text">${escapeHTML(row.overall_perception)}</div></div>`);
+
+      const content = items.join('');
+      const long = content.length > 300 || (content.match(/\n/g)||[]).length > 6;
+      const btn  = long ? `<a href="#" class="toggle-more">Show more</a>` : '';
+      return `<div class="cell-stack"><div class="wrap-text clamp-6">${content}</div>${btn}</div>`;
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Executive summary values
+      document.getElementById('pill-score').textContent = EXEC_SUMMARY.overall_score ?? "—";
+      document.getElementById('pill-hits').textContent  = fmtInt(EXEC_SUMMARY.overall_st_hits);
+      document.getElementById('pill-gmv').textContent   = fmtNum(EXEC_SUMMARY.overall_gmv_oppt);
+
+      // Generic table
+      $('#tbl-generic').DataTable({
+        data: DATA_GENERIC,
+        columns: [
+          {title:'Search Term', data:'search_term'},
+          {title:'Performance', data:'performance'},
+          {title:'Search Hits', data:'st_hits', render:(d)=>fmtInt(d), className:'text-end'},
+          {title:'Search Term GMV', data:'st_gmv', render:(d)=>fmtNum(d), className:'text-end'}
+        ],
+        order: [[2,'desc']],
+        responsive: true,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Branded table
+      $('#tbl-branded').DataTable({
+        data: DATA_BRANDED,
+        columns: [
+          {title:'Search Term', data:'search_term'},
+          {title:'Performance', data:'performance'},
+          {title:'Search Hits', data:'st_hits', render:(d)=>fmtInt(d), className:'text-end'},
+          {title:'Search Term GMV', data:'st_gmv', render:(d)=>fmtNum(d), className:'text-end'}
+        ],
+        order: [[2,'desc']],
+        responsive: true,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Detailed Analysis
+      const dtDetail = $('#tbl-detail').DataTable({
+        data: DATA_DETAIL,
+        columns: [
+          {title:'Search Term', data:'search_term', width:'18%'},
+          {title:'Actionables', data:null, width:'56%', render:(d,type,row)=>makeActionablesCell(row)},
+          {title:'Noon PLP', data:'noon_plp_link', width:'13%', render:(d)=>toLink(d,'Noon PLP')},
+          {title:'Amazon PLP', data:'amazon_plp_link', width:'13%', render:(d)=>toLink(d,'Amazon PLP')}
+        ],
+        order: [[0,'asc']],
+        responsive: false,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Per-cell toggle
+      $('#tbl-detail').on('click', 'a.toggle-more', function(e){
+        e.preventDefault();
+        const wrap = this.closest('td').querySelector('.wrap-text');
+        if (wrap.classList.contains('clamp-6')) {
+          wrap.classList.remove('clamp-6');
+          this.textContent = 'Show less';
+        } else {
+          wrap.classList.add('clamp-6');
+          this.textContent = 'Show more';
+        }
+      });
+
+      // Expand/collapse all
+      document.getElementById('btn-expand-all').addEventListener('click', () => {
+        document.querySelectorAll('#tbl-detail .wrap-text').forEach(el => el.classList.remove('clamp-6'));
+        document.querySelectorAll('#tbl-detail a.toggle-more').forEach(a => a.textContent='Show less');
+      });
+      document.getElementById('btn-collapse-all').addEventListener('click', () => {
+        document.querySelectorAll('#tbl-detail .wrap-text').forEach(el => el.classList.add('clamp-6'));
+        document.querySelectorAll('#tbl-detail a.toggle-more').forEach(a => a.textContent='Show more');
+      });
+    });
+  </script>
+</body>
+</html>

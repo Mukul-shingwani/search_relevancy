@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Search Assortment — automotive / engine_oil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Fonts: Proxima Nova if installed, else Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- DataTables + Buttons -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/fh-4.0.1/r-3.0.1/datatables.min.css"/>
+
+  <style>
+    :root {
+      --bg: #0f1220;
+      --card: #141a2a;
+      --card-2: #181e31;
+      --text: #f3f6ff;     /* normal text = light */
+      --text-dim: #b8c1d9;
+      --border: #252c42;
+      --brand: #7aa2ff;
+      --brand-soft: #1a2340;
+      --card-radius: 14px;
+    }
+    * { font-family: "Proxima Nova", Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial, sans-serif; }
+    html, body { background: var(--bg); color: var(--text); }
+
+    .page-header {
+      background: radial-gradient(1200px 400px at 10% -10%, rgba(122,162,255,.25), transparent),
+                  linear-gradient(90deg, var(--brand-soft), rgba(10,14,25,0.6));
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h2 { font-weight: 700; letter-spacing:.2px; color: var(--text); }
+    .muted { color: var(--text-dim); }
+
+    .btn, .btn:focus, .btn:active { box-shadow:none; }
+    .btn-outline-secondary { color: var(--text); border-color: var(--border); }
+    .btn-outline-secondary:hover { background: var(--card-2); border-color: var(--border); }
+    .btn-outline-primary { color: var(--text); border-color: var(--brand); }
+    .btn-outline-primary:hover { background: rgba(122,162,255,.12); }
+
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      padding: 1rem 1.1rem 1.25rem 1.1rem;
+      height: 100%;
+      contain: content;
+      color: var(--text);
+    }
+    .section-title { font-weight: 700; font-size: 1.05rem; margin-bottom:.6rem; color: var(--text); }
+
+    /* Executive summary pills */
+    .summary-pill {
+      border-radius: 999px;
+      padding:.7rem 1.1rem;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      display:inline-flex; gap:.6rem; align-items:center;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+      margin:.3rem .6rem .3rem 0;
+    }
+    .summary-pill .label { color: var(--text-dim); font-size:.9rem; }
+    .summary-pill .value { font-weight:700; color: var(--text); font-size:1.05rem; }
+
+    /* DataTables: dark + light text everywhere */
+    table.dataTable { table-layout: fixed; color: var(--text); }
+    table.table {
+      --bs-table-color: var(--text);
+      --bs-table-bg: transparent;
+      --bs-table-striped-color: var(--text);
+      --bs-table-hover-color: var(--text);
+      --bs-table-border-color: var(--border);
+      --bs-table-striped-bg: rgba(255,255,255,0.06);
+      --bs-table-hover-bg: rgba(255,255,255,0.08);
+    }
+    table.dataTable thead th {
+      background: var(--card-2) !important;
+      border-bottom: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+    table.dataTable tbody td { vertical-align: top; border-color: var(--border); color: var(--text); }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label { color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .dataTables_wrapper .dataTables_filter input::placeholder { color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      color: var(--text) !important; border-color: var(--border) !important;
+      background: transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: var(--brand-soft) !important; border-color: var(--border) !important; color: var(--text) !important;
+    }
+
+    a, a:visited { color: var(--brand); }
+    a:hover { color: #aecdff; }
+
+    /* Long text handling + toggles */
+    .wrap-text { white-space: pre-wrap; line-height:1.35rem; color: var(--text); }
+    .clamp-6 {
+      display: -webkit-box;
+      -webkit-line-clamp: 6;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cell-stack { display:flex; flex-direction:column; gap:.45rem; color: var(--text); }
+    .toggle-more { font-size:.85rem; padding:0; color: var(--text-dim); }
+    .toggle-more:hover { color: var(--text); }
+
+    /* Actionables list (pills centered vertically) */
+    .act {
+      display:flex; gap:.7rem; align-items:center;       /* centered vertically */
+      background: var(--card-2); border: 1px solid var(--border);
+      border-radius: 12px; padding:.65rem .8rem; color: var(--text);
+    }
+    .act .tag {
+      flex: 0 0 auto; font-size:.72rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.04em; color: var(--brand);
+      padding:.22rem .55rem; border:1px solid var(--brand); border-radius:999px;
+      background: rgba(122,162,255,.08);
+    }
+    .act .txt { flex:1 1 auto; color: var(--text); }
+
+    .footer-note { color: var(--text-dim); font-size:.85rem; }
+  </style>
+</head>
+
+<body>
+  <header class="page-header py-3">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-between">
+        <div>
+          <h2 class="mb-0">Search Assortment — automotive / engine_oil</h2>
+          <div class="muted">Category: <strong>automotive</strong> &nbsp;|&nbsp; Subtype: <strong>engine_oil</strong></div>
+        </div>
+        <div class="text-end">
+          <a class="btn btn-outline-secondary btn-sm" href="#" onclick="window.print()">Print</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container my-4">
+
+    <!-- Executive Summary -->
+    <div class="section-card mb-4">
+      <div class="d-flex align-items-center flex-wrap">
+        <div class="summary-pill"><span class="label">Overall Score</span><span class="value" id="pill-score">—</span></div>
+        <div class="summary-pill"><span class="label">Overall Search Hits</span><span class="value" id="pill-hits">—</span></div>
+        <div class="summary-pill"><span class="label">Overall GMV Opportunity</span><span class="value" id="pill-gmv">—</span></div>
+        <div class="ms-auto muted">Generated on 09 Sep 2025, 08:09 PM</div>
+      </div>
+    </div>
+
+    <!-- Keyword level insights -->
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="section-card">
+          <div class="section-title">Keyword Insights — Generic</div>
+          <table id="tbl-generic" class="table table-striped table-hover w-100"></table>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="section-card">
+          <div class="section-title">Keyword Insights — Branded</div>
+          <table id="tbl-branded" class="table table-striped table-hover w-100"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed analysis -->
+    <div class="section-card mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="section-title mb-0">Detailed Analysis</div>
+        <div class="d-flex gap-2">
+          <button id="btn-expand-all" class="btn btn-sm btn-outline-primary">Expand all</button>
+          <button id="btn-collapse-all" class="btn btn-sm btn-outline-secondary">Collapse all</button>
+        </div>
+      </div>
+      <p class="muted mb-2">Actionables per search term. Links open in a new tab.</p>
+      <table id="tbl-detail" class="table table-striped table-hover w-100"></table>
+    </div>
+
+    <div class="my-4 footer-note">
+      Data source: <code>noonbiml.mukul.search_assortment_final_v2</code>. Report for <strong>automotive × engine_oil</strong>.
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/fh-4.0.1/r-3.0.1/datatables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    const EXEC_SUMMARY = {"overall_score": 0.84, "overall_st_hits": 1399, "overall_gmv_oppt": 939.2};
+    const DATA_GENERIC = [{"search_term": "diesel engine oil", "performance": "Good (0.91)", "st_hits": 2, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "engine oil 5w 30", "performance": "Below Average (0.81)", "st_hits": 131, "e_gmv": 0, "st_gmv": 367.01}, {"search_term": "5w30 engine oil", "performance": "Below Average (0.84)", "st_hits": 182, "e_gmv": 0, "st_gmv": 99.45}, {"search_term": "motorcycle engine oil", "performance": "Average (0.85)", "st_hits": 9, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "adnoc", "performance": "Good (0.93)", "st_hits": 171, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "liqui moly", "performance": "Below Average (0.80)", "st_hits": 361, "e_gmv": 0, "st_gmv": 495.52}, {"search_term": "engine oil", "performance": "Below Average (0.81)", "st_hits": 283, "e_gmv": 0, "st_gmv": 354.96}, {"search_term": "castrol 5w30", "performance": "Good (0.94)", "st_hits": 93, "e_gmv": 0, "st_gmv": 127.0}, {"search_term": "car oil", "performance": "Below Average (0.85)", "st_hits": 90, "e_gmv": 0, "st_gmv": 79.0}, {"search_term": "engine oil filter", "performance": "Average (0.89)", "st_hits": 7, "e_gmv": 0, "st_gmv": 0.0}];
+    const DATA_BRANDED = [{"search_term": "liqui moly engine oil", "performance": "Good (0.90)", "st_hits": 8, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "acdelco engine oil", "performance": "Below Average (0.70)", "st_hits": 4, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "castrol engine oil", "performance": "Average (0.87)", "st_hits": 17, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "shell engine oil", "performance": "Below Average (0.82)", "st_hits": 35, "e_gmv": 0, "st_gmv": 145.0}, {"search_term": "mobil engine oil", "performance": "Below Average (0.84)", "st_hits": 6, "e_gmv": 0, "st_gmv": 176.3}];
+    const DATA_DETAIL  = [{"search_term": "liqui moly engine oil", "brand_actionable": "- Liqui Moly appears prominently on Noon (4 listings) vs Amazon (2 listings), but Noon lacks other Molygen variants Amazon offers.  \n- Noon covers 50% of Amazon’s Liqui Moly-related SKUs, missing some synthetic variants.", "assortment_actionable": "- Noon ranks Liqui Moly fully synthetic oils top but lacks smaller pack sizes and additive products Amazon lists.", "overall_perception": "- Noon’s first page blends branded Liqui Moly with unrelated oils, while Amazon emphasizes branded, relevant Liqui Moly and additives, boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=liqui%20moly%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=liqui+moly+engine+oil"}, {"search_term": "acdelco engine oil", "brand_actionable": "- ACDelco appears 6 times on Noon (60% of top 10), absent on Amazon’s engine oil listings.  \n- Noon covers only ACDelco brand; Amazon offers diverse brands with no ACDelco presence.", "assortment_actionable": "- Noon ranks mostly ACDelco filters/caps, lacking ACDelco engine oil variants; Amazon leads with multiple synthetic engine oils top-ranked.", "overall_perception": "- Noon’s top results mix unrelated ACDelco parts, confusing for “ACDelco engine oil” search; Amazon shows clear, relevant engine oil SKUs.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=acdelco%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=acdelco+engine+oil"}, {"search_term": "castrol engine oil", "brand_actionable": "- Castrol appears prominently on Noon (3 SKUs) vs Amazon (5 SKUs), but Noon ranks non-Castrol Magnatec higher initially.  \n- Noon covers 50% fewer Castrol variants than Amazon, limiting brand depth for the keyword.", "assortment_actionable": "- Noon’s top slots favor Magnatec over Castrol; Amazon prioritizes Castrol Edge variants, enhancing brand relevance and visibility.", "overall_perception": "- Noon’s mix blends Castrol with less relevant Magnatec, diluting keyword focus; Amazon leads with premium, keyword-aligned Castrol Edge oils.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=castrol%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=castrol+engine+oil"}, {"search_term": "shell engine oil", "brand_actionable": "- Shell appears prominently on Noon (4 listings) vs Amazon (0 Shell), but Noon lacks Helix variants variety seen on Amazon.  \n- Noon covers 1/3 top Amazon brands (Shell, Helix), missing Amazon’s broader Helix HX8/HX6 range.", "assortment_actionable": "- Noon ranks Shell engine oils well but lacks Helix variant depth and pack size diversity Amazon shows in top slots.", "overall_perception": "- Noon’s first page mixes relevant Shell oils with unrelated items (necklace), while Amazon’s page is fully focused on branded engine oils.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=shell%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=shell+engine+oil"}, {"search_term": "mobil engine oil", "brand_actionable": "- Mobil appears less prominently on Noon (2/10) vs Amazon (6/10), indicating weaker brand share.  \n- Noon lacks some Mobil premium variants like Mobil 1 Advanced Fully Synthetic present on Amazon.", "assortment_actionable": "- Noon ranks fewer Mobil branded SKUs top; Amazon leads with diverse sizes and synthetic options in top slots.", "overall_perception": "- Noon’s first page mixes generic and Mobil oils but lacks premium Mobil prominence seen on Amazon, reducing shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=mobil%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=mobil+engine+oil"}, {"search_term": "diesel engine oil", "brand_actionable": "- Noon covers 3/6 top Amazon diesel oil brands (50%), missing Caltex and Mobil prominently present on Amazon.  \n- Venol appears frequently on both, but Amazon offers stronger presence of heavy-duty diesel brands like Shell and V8.", "assortment_actionable": "- Noon ranks mostly generic or gasoline/diesel combo oils top; Amazon prioritizes diesel-specific oils with varied pack sizes and heavy-duty formulas.", "overall_perception": "- Noon’s first page mixes generic and gasoline oils, reducing diesel-specific relevance; Amazon leads with focused, premium diesel engine oils building shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=diesel%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=diesel+engine+oil"}, {"search_term": "engine oil 5w 30", "brand_actionable": "- Noon covers 4 key brands (VENOL, TOTAL, Magnatec, V8) vs Amazon’s 6 including Shell, Castrol, MANNOL.  \n- Shell and Castrol prominent on Amazon but absent or low-ranked on Noon.", "assortment_actionable": "- Noon lacks multipack and varied size options visible top-ranked; Amazon shows 1L to 5L variants and multipacks in top results.", "overall_perception": "- Noon’s first page mixes budget and mid-tier brands; Amazon leads with premium, well-known brands boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=engine%20oil%205w%2030&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=engine+oil+5w+30"}, {"search_term": "5w30 engine oil", "brand_actionable": "- Noon covers key brands like Total, Venol, Magnatec; lacks Shell, BMW, Toyota present on Amazon.  \n- Noon shows fewer premium German brands (e.g., Mannol, V8) compared to Amazon’s broader brand variety.", "assortment_actionable": "- Noon ranks mostly 4L variants; Amazon offers more size variety (1L, 4L, 5L) and branded premium SKUs in top slots.", "overall_perception": "- Noon’s first page mixes budget and mid-tier oils; Amazon leads with premium, well-known brands boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=5w30%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=5w30+engine+oil"}, {"search_term": "motorcycle engine oil", "brand_actionable": "- Noon covers 3 key brands (Liqui Moly, Motul, HIGHTEC) vs Amazon’s 5, missing Shell and Comet presence.  \n- Liqui Moly share: Noon 20% vs Amazon 30%, indicating weaker brand prominence on Noon.", "assortment_actionable": "- Noon lacks multipacks and larger volume variants that Amazon ranks top, limiting shopper choice for motorcycle engine oil.", "overall_perception": "- Noon’s first page mixes premium and generic oils but lacks Shell’s strong branded presence Amazon shows, reducing perceived assortment strength.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=motorcycle%20engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=motorcycle+engine+oil"}, {"search_term": "adnoc", "brand_actionable": "- ADNOC brand appears prominently on Noon (60%+ titles) vs Amazon (50%), but Noon lacks other ADNOC variants seen on Amazon.  \n- Noon covers 4 ADNOC Voyager variants; Amazon shows additional pack sizes and slight model variations.", "assortment_actionable": "- Amazon ranks 1L and 4L ADNOC Voyager oils in top slots; Noon mostly shows 4L variants, limiting size choice visibility.", "overall_perception": "- Noon’s first page strongly ADNOC-focused but less size-diverse; Amazon offers broader ADNOC options, enhancing shopper trust and relevance.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=adnoc&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=adnoc"}, {"search_term": "liqui moly", "brand_actionable": "- Noon features Liqui Moly prominently with 4 SKUs vs Amazon’s 3, showing strong brand presence.  \n- Amazon includes Cera Tec and Molygen, absent or less visible on Noon, limiting brand variety.", "assortment_actionable": "- Noon ranks Liqui Moly multipacks and fuel system treatments higher; Amazon shows more single-pack variants top-ranked.", "overall_perception": "- Noon’s first page emphasizes branded Liqui Moly products, building shopper trust better than Amazon’s mixed brand and generic listings.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=liqui%20moly&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=liqui+moly"}, {"search_term": "engine oil", "brand_actionable": "- Noon covers 3 top Amazon brands (Liqui Moly, Total, Shell absent on Noon).  \n- Premium brands like Shell and BMW present on Amazon but missing or low on Noon.", "assortment_actionable": "- Noon lacks top Shell and BMW SKUs in top ranks; Amazon shows broader synthetic oil variants and pack sizes.", "overall_perception": "- Noon’s first page mixes budget and mid-tier oils; Amazon leads with premium, branded, and feature-rich engine oils upfront.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=engine%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=engine+oil"}, {"search_term": "castrol 5w30", "brand_actionable": "- Castrol appears prominently on Noon with 6 listings vs 4 on Amazon, showing stronger brand presence.  \n- Noon lacks BP and Magnetec variety seen on Amazon, limiting brand diversity.", "assortment_actionable": "- Noon ranks multiple Castrol 5W-30 variants top, but Amazon offers more pack sizes and Stop/Start tech options.", "overall_perception": "- Noon’s first page is Castrol-heavy and premium; Amazon balances branded and budget options, enhancing shopper trust and choice.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=castrol%205w30&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=castrol+5w30"}, {"search_term": "car oil", "brand_actionable": "- Noon covers key brands Castrol, Liqui Moly, Magnatec; lacks Shell and Mobil prominence seen on Amazon.  \n- Noon misses MANNOL and Motul brands present on Amazon, limiting brand variety for \"car oil.\"", "assortment_actionable": "- Noon ranks fewer fully synthetic variants top; Amazon leads with broader pack sizes and premium brand visibility.", "overall_perception": "- Noon’s first page mixes mid-to-high price oils but lacks Shell and Mobil’s premium appeal dominating Amazon’s top ranks.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=car%20oil&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=car+oil"}, {"search_term": "engine oil filter", "brand_actionable": "- Noon covers 4 key brands (WEMZER, Motorcraft, Premium) vs Amazon’s 7 including Mopar, ACDelco, Fram.  \n- Motorcraft share higher on Noon (2/10) than Amazon (2/10), but key brands like Fram absent on Noon.", "assortment_actionable": "- Amazon ranks more brand-specific filters (Toyota, Nissan, Honda) top; Noon shows more generics and universal fits upfront.", "overall_perception": "- Noon’s first page leans on generic filters; Amazon leads with branded, model-specific, and premium filters enhancing shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=engine%20oil%20filter&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=engine+oil+filter"}];
+
+    const fmtInt = (v) => (v === null || v === undefined || isNaN(v)) ? "—" : Number(v).toLocaleString();
+    const fmtNum = (v) => (v === null || v === undefined || isNaN(v)) ? "—" : Number(v).toLocaleString(undefined, {"minimumFractionDigits":0,"maximumFractionDigits":2});
+    const toLink = (url, label) => {
+      if (!url || typeof url !== 'string') return '';
+      const safe = url.startsWith('http') ? url : null;
+      return safe ? `<a href="${safe}" target="_blank" rel="noopener">${label || 'Open'}</a>` : '';
+    };
+    const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+
+    // Single "Actionables" cell from 3 fields
+    const makeActionablesCell = (row) => {
+      const items = [];
+      if (row.brand_actionable) items.push(`<div class="act"><div class="tag">Brand</div><div class="txt wrap-text">${escapeHTML(row.brand_actionable)}</div></div>`);
+      if (row.assortment_actionable) items.push(`<div class="act"><div class="tag">Assortment</div><div class="txt wrap-text">${escapeHTML(row.assortment_actionable)}</div></div>`);
+      if (row.overall_perception) items.push(`<div class="act"><div class="tag">Perception</div><div class="txt wrap-text">${escapeHTML(row.overall_perception)}</div></div>`);
+
+      const content = items.join('');
+      const long = content.length > 300 || (content.match(/\n/g)||[]).length > 6;
+      const btn  = long ? `<a href="#" class="toggle-more">Show more</a>` : '';
+      return `<div class="cell-stack"><div class="wrap-text clamp-6">${content}</div>${btn}</div>`;
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Executive summary values
+      document.getElementById('pill-score').textContent = EXEC_SUMMARY.overall_score ?? "—";
+      document.getElementById('pill-hits').textContent  = fmtInt(EXEC_SUMMARY.overall_st_hits);
+      document.getElementById('pill-gmv').textContent   = fmtNum(EXEC_SUMMARY.overall_gmv_oppt);
+
+      // Generic table
+      $('#tbl-generic').DataTable({
+        data: DATA_GENERIC,
+        columns: [
+          {title:'Search Term', data:'search_term'},
+          {title:'Performance', data:'performance'},
+          {title:'Search Hits', data:'st_hits', render:(d)=>fmtInt(d), className:'text-end'},
+          {title:'Search Term GMV', data:'st_gmv', render:(d)=>fmtNum(d), className:'text-end'}
+        ],
+        order: [[2,'desc']],
+        responsive: true,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Branded table
+      $('#tbl-branded').DataTable({
+        data: DATA_BRANDED,
+        columns: [
+          {title:'Search Term', data:'search_term'},
+          {title:'Performance', data:'performance'},
+          {title:'Search Hits', data:'st_hits', render:(d)=>fmtInt(d), className:'text-end'},
+          {title:'Search Term GMV', data:'st_gmv', render:(d)=>fmtNum(d), className:'text-end'}
+        ],
+        order: [[2,'desc']],
+        responsive: true,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Detailed Analysis
+      const dtDetail = $('#tbl-detail').DataTable({
+        data: DATA_DETAIL,
+        columns: [
+          {title:'Search Term', data:'search_term', width:'18%'},
+          {title:'Actionables', data:null, width:'56%', render:(d,type,row)=>makeActionablesCell(row)},
+          {title:'Noon PLP', data:'noon_plp_link', width:'13%', render:(d)=>toLink(d,'Noon PLP')},
+          {title:'Amazon PLP', data:'amazon_plp_link', width:'13%', render:(d)=>toLink(d,'Amazon PLP')}
+        ],
+        order: [[0,'asc']],
+        responsive: false,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Per-cell toggle
+      $('#tbl-detail').on('click', 'a.toggle-more', function(e){
+        e.preventDefault();
+        const wrap = this.closest('td').querySelector('.wrap-text');
+        if (wrap.classList.contains('clamp-6')) {
+          wrap.classList.remove('clamp-6');
+          this.textContent = 'Show less';
+        } else {
+          wrap.classList.add('clamp-6');
+          this.textContent = 'Show more';
+        }
+      });
+
+      // Expand/collapse all
+      document.getElementById('btn-expand-all').addEventListener('click', () => {
+        document.querySelectorAll('#tbl-detail .wrap-text').forEach(el => el.classList.remove('clamp-6'));
+        document.querySelectorAll('#tbl-detail a.toggle-more').forEach(a => a.textContent='Show less');
+      });
+      document.getElementById('btn-collapse-all').addEventListener('click', () => {
+        document.querySelectorAll('#tbl-detail .wrap-text').forEach(el => el.classList.add('clamp-6'));
+        document.querySelectorAll('#tbl-detail a.toggle-more').forEach(a => a.textContent='Show more');
+      });
+    });
+  </script>
+</body>
+</html>
