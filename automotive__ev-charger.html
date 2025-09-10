@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Search Assortment — automotive / ev_charger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Fonts: Proxima Nova if installed, else Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- DataTables + Buttons -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/fh-4.0.1/r-3.0.1/datatables.min.css"/>
+
+  <style>
+    :root {
+      --bg: #0f1220;
+      --card: #141a2a;
+      --card-2: #181e31;
+      --text: #f3f6ff;     /* normal text = light */
+      --text-dim: #b8c1d9;
+      --border: #252c42;
+      --brand: #7aa2ff;
+      --brand-soft: #1a2340;
+      --card-radius: 14px;
+    }
+    * { font-family: "Proxima Nova", Inter, "Segoe UI", Roboto, system-ui, -apple-system, Arial, sans-serif; }
+    html, body { background: var(--bg); color: var(--text); }
+
+    .page-header {
+      background: radial-gradient(1200px 400px at 10% -10%, rgba(122,162,255,.25), transparent),
+                  linear-gradient(90deg, var(--brand-soft), rgba(10,14,25,0.6));
+      border-bottom: 1px solid var(--border);
+    }
+    .page-header h2 { font-weight: 700; letter-spacing:.2px; color: var(--text); }
+    .muted { color: var(--text-dim); }
+
+    .btn, .btn:focus, .btn:active { box-shadow:none; }
+    .btn-outline-secondary { color: var(--text); border-color: var(--border); }
+    .btn-outline-secondary:hover { background: var(--card-2); border-color: var(--border); }
+    .btn-outline-primary { color: var(--text); border-color: var(--brand); }
+    .btn-outline-primary:hover { background: rgba(122,162,255,.12); }
+
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      padding: 1rem 1.1rem 1.25rem 1.1rem;
+      height: 100%;
+      contain: content;
+      color: var(--text);
+    }
+    .section-title { font-weight: 700; font-size: 1.05rem; margin-bottom:.6rem; color: var(--text); }
+
+    /* Executive summary pills */
+    .summary-pill {
+      border-radius: 999px;
+      padding:.7rem 1.1rem;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      display:inline-flex; gap:.6rem; align-items:center;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+      margin:.3rem .6rem .3rem 0;
+    }
+    .summary-pill .label { color: var(--text-dim); font-size:.9rem; }
+    .summary-pill .value { font-weight:700; color: var(--text); font-size:1.05rem; }
+
+    /* DataTables: dark + light text everywhere */
+    table.dataTable { table-layout: fixed; color: var(--text); }
+    table.table {
+      --bs-table-color: var(--text);
+      --bs-table-bg: transparent;
+      --bs-table-striped-color: var(--text);
+      --bs-table-hover-color: var(--text);
+      --bs-table-border-color: var(--border);
+      --bs-table-striped-bg: rgba(255,255,255,0.06);
+      --bs-table-hover-bg: rgba(255,255,255,0.08);
+    }
+    table.dataTable thead th {
+      background: var(--card-2) !important;
+      border-bottom: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+    table.dataTable tbody td { vertical-align: top; border-color: var(--border); color: var(--text); }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label { color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_filter input,
+    .dataTables_wrapper .dataTables_length select {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .dataTables_wrapper .dataTables_filter input::placeholder { color: var(--text-dim); }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      color: var(--text) !important; border-color: var(--border) !important;
+      background: transparent !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: var(--brand-soft) !important; border-color: var(--border) !important; color: var(--text) !important;
+    }
+
+    a, a:visited { color: var(--brand); }
+    a:hover { color: #aecdff; }
+
+    /* Long text handling + toggles */
+    .wrap-text { white-space: pre-wrap; line-height:1.35rem; color: var(--text); }
+    .clamp-6 {
+      display: -webkit-box;
+      -webkit-line-clamp: 6;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cell-stack { display:flex; flex-direction:column; gap:.45rem; color: var(--text); }
+    .toggle-more { font-size:.85rem; padding:0; color: var(--text-dim); }
+    .toggle-more:hover { color: var(--text); }
+
+    /* Actionables list (pills centered vertically) */
+    .act {
+      display:flex; gap:.7rem; align-items:center;       /* centered vertically */
+      background: var(--card-2); border: 1px solid var(--border);
+      border-radius: 12px; padding:.65rem .8rem; color: var(--text);
+    }
+    .act .tag {
+      flex: 0 0 auto; font-size:.72rem; font-weight:700; text-transform:uppercase;
+      letter-spacing:.04em; color: var(--brand);
+      padding:.22rem .55rem; border:1px solid var(--brand); border-radius:999px;
+      background: rgba(122,162,255,.08);
+    }
+    .act .txt { flex:1 1 auto; color: var(--text); }
+
+    .footer-note { color: var(--text-dim); font-size:.85rem; }
+  </style>
+</head>
+
+<body>
+  <header class="page-header py-3">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-between">
+        <div>
+          <h2 class="mb-0">Search Assortment — automotive / ev_charger</h2>
+          <div class="muted">Category: <strong>automotive</strong> &nbsp;|&nbsp; Subtype: <strong>ev_charger</strong></div>
+        </div>
+        <div class="text-end">
+          <a class="btn btn-outline-secondary btn-sm" href="#" onclick="window.print()">Print</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container my-4">
+
+    <!-- Executive Summary -->
+    <div class="section-card mb-4">
+      <div class="d-flex align-items-center flex-wrap">
+        <div class="summary-pill"><span class="label">Overall Score</span><span class="value" id="pill-score">—</span></div>
+        <div class="summary-pill"><span class="label">Overall Search Hits</span><span class="value" id="pill-hits">—</span></div>
+        <div class="summary-pill"><span class="label">Overall GMV Opportunity</span><span class="value" id="pill-gmv">—</span></div>
+        <div class="ms-auto muted">Generated on 10 Sep 2025, 10:00 AM</div>
+      </div>
+    </div>
+
+    <!-- Keyword level insights -->
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="section-card">
+          <div class="section-title">Keyword Insights — Generic</div>
+          <table id="tbl-generic" class="table table-striped table-hover w-100"></table>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="section-card">
+          <div class="section-title">Keyword Insights — Branded</div>
+          <table id="tbl-branded" class="table table-striped table-hover w-100"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed analysis -->
+    <div class="section-card mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="section-title mb-0">Detailed Analysis</div>
+        <div class="d-flex gap-2">
+          <button id="btn-expand-all" class="btn btn-sm btn-outline-primary">Expand all</button>
+          <button id="btn-collapse-all" class="btn btn-sm btn-outline-secondary">Collapse all</button>
+        </div>
+      </div>
+      <p class="muted mb-2">Actionables per search term. Links open in a new tab.</p>
+      <table id="tbl-detail" class="table table-striped table-hover w-100"></table>
+    </div>
+
+    <div class="my-4 footer-note">
+      Data source: <code>noonbiml.mukul.search_assortment_final_v2_temp</code>. Report for <strong>automotive × ev_charger</strong>.
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/fh-4.0.1/r-3.0.1/datatables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    const EXEC_SUMMARY = {"overall_score": 0.75, "overall_st_hits": 151, "overall_gmv_oppt": 3066.44};
+    const DATA_GENERIC = [{"search_term": "type 2 charger", "performance": "Below Average (0.71)", "st_hits": 3, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "electric car charger", "performance": "Below Average (0.77)", "st_hits": 28, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "portable ev charger", "performance": "Below Average (0.81)", "st_hits": 7, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "ev charger car", "performance": "Below Average (0.82)", "st_hits": 2, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "ev charger adapter", "performance": "Below Average (0.72)", "st_hits": 1, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "ev home charger", "performance": "Below Average (0.74)", "st_hits": 1, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "ev charger", "performance": "Poor (0.63)", "st_hits": 100, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "ev charging cable", "performance": "Below Average (0.75)", "st_hits": 9, "e_gmv": 0, "st_gmv": 0.0}];
+    const DATA_BRANDED = [{"search_term": "tesla ev charger", "performance": "Below Average (0.76)", "st_hits": 0, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "wallbox ev charger", "performance": "Below Average (0.76)", "st_hits": 0, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "easee ev charger", "performance": "Below Average (0.75)", "st_hits": 0, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "hypervolt ev charger", "performance": "Below Average (0.75)", "st_hits": 0, "e_gmv": 0, "st_gmv": 0.0}, {"search_term": "schneider ev charger", "performance": "Below Average (0.79)", "st_hits": 0, "e_gmv": 0, "st_gmv": 0.0}];
+    const DATA_DETAIL  = [{"search_term": "tesla ev charger", "brand_actionable": "- Noon lacks Tesla-branded chargers, showing mostly adapters; Amazon features Tesla Wall Connector and Mobile Connector prominently.  \n- Noon covers 1/5 key Tesla charger types Amazon offers (20%), missing mobile and wall connectors.", "assortment_actionable": "- Noon ranks mostly Tesla adapters with limited variant depth; Amazon shows diverse Tesla charger types and power ratings top-ranked.", "overall_perception": "- Noon’s first page is adapter-heavy, lower-priced, less premium; Amazon leads with authentic Tesla chargers, boosting shopper trust and relevance.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=tesla%20ev%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=tesla+ev+charger"}, {"search_term": "wallbox ev charger", "brand_actionable": "- Noon lacks key brands like Pulsar and Wallbox Pro present on Amazon.  \n- Noon covers 2/7 top Amazon brands (~29%), missing premium EV charger brands.", "assortment_actionable": "- Noon ranks fewer high-power (11kW+) wallbox chargers top; Amazon leads with diverse power and cable length variants.", "overall_perception": "- Noon’s first page mixes chargers with unrelated accessories, reducing focus; Amazon prioritizes relevant, feature-rich wallbox chargers.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=wallbox%20ev%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=wallbox+ev+charger"}, {"search_term": "easee ev charger", "brand_actionable": "- Easee brand absent on Noon but implicitly present on Amazon via Type 2 chargers.  \n- Noon covers generic EV charger brands only; Amazon shows broader adapter/charger types linked to Easee ecosystem.", "assortment_actionable": "- Noon ranks mostly generic or unrelated car phone chargers top; Amazon prioritizes EV-specific Type 2 and branded adapters.", "overall_perception": "- Noon’s first page mixes irrelevant car phone chargers with EV chargers, reducing shopper trust versus Amazon’s focused, relevant EV charger lineup.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=easee%20ev%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=easee+ev+charger"}, {"search_term": "hypervolt ev charger", "brand_actionable": "- Hypervolt brand appears once on Noon vs 4 times on Amazon, indicating weak brand presence.  \n- Noon covers 1/4 top Amazon Hypervolt SKUs (25%), missing premium variants.", "assortment_actionable": "- Noon lacks top Hypervolt EV charger models in top ranks; Amazon ranks multiple Hypervolt 7kW smart chargers prominently.", "overall_perception": "- Noon’s first page mixes unrelated items (massage gun, wireless chargers) diluting relevance; Amazon leads with focused, premium Hypervolt EV chargers.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=hypervolt%20ev%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=hypervolt+ev+charger"}, {"search_term": "schneider ev charger", "brand_actionable": "- Schneider appears only on Amazon, dominating top ranks; Noon lacks Schneider EV chargers entirely.  \n- Noon covers no key Schneider or similar premium EV charger brands, unlike Amazon’s strong brand presence.", "assortment_actionable": "- Noon’s top results show generic adapters, missing Schneider’s premium, feature-rich chargers prominently ranked on Amazon.", "overall_perception": "- Noon’s first page mixes unrelated adapters, lacking Schneider branding, reducing shopper trust versus Amazon’s focused, premium Schneider listings.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=schneider%20ev%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=schneider+ev+charger"}, {"search_term": "type 2 charger", "brand_actionable": "- Noon lacks key EV charger brands present on Amazon (e.g., Chargingo, EVPEIWE).  \n- Noon covers mostly generic chargers; Amazon features 100% EV-specific brands.", "assortment_actionable": "- Noon ranks mostly phone/tablet chargers top; Amazon prioritizes dedicated Type 2 EV charging cables.", "overall_perception": "- Noon’s first page mixes irrelevant phone chargers; Amazon leads with premium, highly relevant Type 2 EV charger cables.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=type%202%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=type+2+charger"}, {"search_term": "electric car charger", "brand_actionable": "- Noon lacks key EV charger brands like QIAO, Aiskooc, EVPEIWE featured on Amazon.  \n- Noon covers only 1/5 top Amazon EV charger brands (20%) in top listings.", "assortment_actionable": "- Noon ranks mostly generic car/mobile chargers; misses specific EV charger models in top slots.", "overall_perception": "- Noon’s first page mixes irrelevant low-power chargers; Amazon leads with relevant, premium EV chargers.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=electric%20car%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=electric+car+charger"}, {"search_term": "portable ev charger", "brand_actionable": "- Noon lacks key EV charger brands like MCEVKELN, EVIEUN, Aiskooc, present on Amazon.  \n- Noon covers 0/6 top Amazon EV charger brands (0%).", "assortment_actionable": "- Noon ranks mostly unrelated car/mobile chargers; Amazon leads with multiple portable EV charger models top-ranked.", "overall_perception": "- Noon’s first page mixes irrelevant items; Amazon offers premium, relevant portable EV chargers, building stronger shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=portable%20ev%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=portable+ev+charger"}, {"search_term": "ev charger car", "brand_actionable": "- Noon lacks key EV charger brands like EVPEIWE, Aiskooc, MCEVKELN present on Amazon.  \n- Noon’s top products are mostly adapters and generic car chargers, missing premium EV charger brands (0/8 Amazon brands matched).", "assortment_actionable": "- Noon ranks mostly generic car chargers and adapters; Amazon features diverse, feature-rich EV chargers with varied power ratings and cable lengths.", "overall_perception": "- Noon’s first page mixes irrelevant car adapters and generic chargers; Amazon leads with specialized, branded EV chargers, enhancing shopper trust and relevance.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=ev%20charger%20car&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=ev+charger+car"}, {"search_term": "ev charger adapter", "brand_actionable": "- Noon lacks key Chinese EV charger brands (Aiskooc, EVIEUN) present on Amazon.  \n- Noon’s Tesla adapter share is high but limited to one brand/type versus Amazon’s broader brand variety.", "assortment_actionable": "- Amazon offers diverse EV charger adapters (Type 2, GBT, UK plugs); Noon ranks mostly Tesla J1772 adapters, limiting feature breadth.", "overall_perception": "- Noon’s first page is Tesla-centric and repetitive; Amazon presents broader, premium, and varied EV charger adapters enhancing shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=ev%20charger%20adapter&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=ev+charger+adapter"}, {"search_term": "ev home charger", "brand_actionable": "- Noon covers 3/9 Amazon EV charger brands (33%), missing key brands like EVIEUN and QIAO.  \n- Noon lacks prominent smart charger brands with Wi-Fi and RFID features seen on Amazon.", "assortment_actionable": "- Noon ranks generic chargers top; lacks diverse power ratings, smart features, and portable EV home chargers visible on Amazon.", "overall_perception": "- Noon’s first page mixes irrelevant electronics and lacks premium, feature-rich EV home chargers, unlike Amazon’s focused, trusted EV charger lineup.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=ev%20home%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=ev+home+charger"}, {"search_term": "ev charger", "brand_actionable": "- Noon lacks key EV charger brands present on Amazon, covering only adapters and limited home chargers.  \n- Amazon features diverse top brands with premium models; Noon shows repetitive Tesla adapters dominating.", "assortment_actionable": "- Noon ranks mostly adapters and one home charger; Amazon leads with varied portable, adjustable, and feature-rich EV chargers.", "overall_perception": "- Noon’s first page is adapter-heavy and low variety; Amazon presents a balanced, premium, and relevant EV charger mix building shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=ev%20charger&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=ev+charger"}, {"search_term": "ev charging cable", "brand_actionable": "- Noon lacks top EV charger cable brands like Aiskooc, EVPEIWE, Gruensauber present on Amazon.  \n- Noon covers 0/7 leading Amazon EV charging cable brands (0%).", "assortment_actionable": "- Noon ranks mostly generic charging cables, missing specialized EV charging cable variants and key feature-rich models in top slots.", "overall_perception": "- Noon’s first page mixes irrelevant generic cables; Amazon leads with highly relevant, branded EV charging cables, boosting shopper trust.", "noon_plp_link": "https://www.noon.com/uae-en/search/?q=ev%20charging%20cable&av=0&e[search-ae]", "amazon_plp_link": "https://www.amazon.ae/s?k=ev+charging+cable"}];
+
+    const fmtInt = (v) => (v === null || v === undefined || isNaN(v)) ? "—" : Number(v).toLocaleString();
+    const fmtNum = (v) => (v === null || v === undefined || isNaN(v)) ? "—" : Number(v).toLocaleString(undefined, {"minimumFractionDigits":0,"maximumFractionDigits":2});
+    const toLink = (url, label) => {
+      if (!url || typeof url !== 'string') return '';
+      const safe = url.startsWith('http') ? url : null;
+      return safe ? `<a href="${safe}" target="_blank" rel="noopener">${label || 'Open'}</a>` : '';
+    };
+    const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+
+    // Single "Actionables" cell from 3 fields
+    const makeActionablesCell = (row) => {
+      const items = [];
+      if (row.brand_actionable) items.push(`<div class="act"><div class="tag">Brand</div><div class="txt wrap-text">${escapeHTML(row.brand_actionable)}</div></div>`);
+      if (row.assortment_actionable) items.push(`<div class="act"><div class="tag">Assortment</div><div class="txt wrap-text">${escapeHTML(row.assortment_actionable)}</div></div>`);
+      if (row.overall_perception) items.push(`<div class="act"><div class="tag">Perception</div><div class="txt wrap-text">${escapeHTML(row.overall_perception)}</div></div>`);
+
+      const content = items.join('');
+      const long = content.length > 300 || (content.match(/\n/g)||[]).length > 6;
+      const btn  = long ? `<a href="#" class="toggle-more">Show more</a>` : '';
+      return `<div class="cell-stack"><div class="wrap-text clamp-6">${content}</div>${btn}</div>`;
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Executive summary values
+      document.getElementById('pill-score').textContent = EXEC_SUMMARY.overall_score ?? "—";
+      document.getElementById('pill-hits').textContent  = fmtInt(EXEC_SUMMARY.overall_st_hits);
+      document.getElementById('pill-gmv').textContent   = fmtNum(EXEC_SUMMARY.overall_gmv_oppt);
+
+      // Generic table
+      $('#tbl-generic').DataTable({
+        data: DATA_GENERIC,
+        columns: [
+          {title:'Search Term', data:'search_term'},
+          {title:'Performance', data:'performance'},
+          {title:'Search Hits', data:'st_hits', render:(d)=>fmtInt(d), className:'text-end'},
+          {title:'Search Term GMV', data:'st_gmv', render:(d)=>fmtNum(d), className:'text-end'}
+        ],
+        order: [[2,'desc']],
+        responsive: true,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Branded table
+      $('#tbl-branded').DataTable({
+        data: DATA_BRANDED,
+        columns: [
+          {title:'Search Term', data:'search_term'},
+          {title:'Performance', data:'performance'},
+          {title:'Search Hits', data:'st_hits', render:(d)=>fmtInt(d), className:'text-end'},
+          {title:'Search Term GMV', data:'st_gmv', render:(d)=>fmtNum(d), className:'text-end'}
+        ],
+        order: [[2,'desc']],
+        responsive: true,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Detailed Analysis
+      const dtDetail = $('#tbl-detail').DataTable({
+        data: DATA_DETAIL,
+        columns: [
+          {title:'Search Term', data:'search_term', width:'18%'},
+          {title:'Actionables', data:null, width:'56%', render:(d,type,row)=>makeActionablesCell(row)},
+          {title:'Noon PLP', data:'noon_plp_link', width:'13%', render:(d)=>toLink(d,'Noon PLP')},
+          {title:'Amazon PLP', data:'amazon_plp_link', width:'13%', render:(d)=>toLink(d,'Amazon PLP')}
+        ],
+        order: [[0,'asc']],
+        responsive: false,
+        fixedHeader: false,
+        deferRender: true,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [10,25,50,100],
+        dom:'Bfrtip',
+        buttons:['pageLength','copy','csv']
+      });
+
+      // Per-cell toggle
+      $('#tbl-detail').on('click', 'a.toggle-more', function(e){
+        e.preventDefault();
+        const wrap = this.closest('td').querySelector('.wrap-text');
+        if (wrap.classList.contains('clamp-6')) {
+          wrap.classList.remove('clamp-6');
+          this.textContent = 'Show less';
+        } else {
+          wrap.classList.add('clamp-6');
+          this.textContent = 'Show more';
+        }
+      });
+
+      // Expand/collapse all
+      document.getElementById('btn-expand-all').addEventListener('click', () => {
+        document.querySelectorAll('#tbl-detail .wrap-text').forEach(el => el.classList.remove('clamp-6'));
+        document.querySelectorAll('#tbl-detail a.toggle-more').forEach(a => a.textContent='Show less');
+      });
+      document.getElementById('btn-collapse-all').addEventListener('click', () => {
+        document.querySelectorAll('#tbl-detail .wrap-text').forEach(el => el.classList.add('clamp-6'));
+        document.querySelectorAll('#tbl-detail a.toggle-more').forEach(a => a.textContent='Show more');
+      });
+    });
+  </script>
+</body>
+</html>
